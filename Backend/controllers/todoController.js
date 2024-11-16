@@ -22,27 +22,43 @@ module.exports.saveTodo =async(req,res)=>{
   })
 }
 
-module.exports.updateTodo = async(req,res)=>{
-  const  {_id,text}=req.body;
-  todoModel.findByIdAndUpdate(_id,{text})
-  .then(()=>{
-    res.send('data updated successfully')
-    console.log('updated successfully')
-  })
-  .catch((err)=>{
-    console.log(err);
-    res.send(err);
-  })
-}
-module.exports.deleteTodo = async(req,res)=>{
-  const  {_id}=req.body;
-  todoModel.findByIdAndDelete(_id)
-  .then(()=>{
-    res.send('successfully deleted')
-    console.log('deleted sucessfully')
-  })
-  .catch((err)=>{
-    console.log(err);
-    res.send(err);
-  })
-}
+module.exports.updateTodo = async (req, res) => {
+  const { id } = req.params;
+  const { text } = req.body;
+
+  try {
+    const updatedTodo = await todoModel.findByIdAndUpdate(
+      id,
+      { text },
+      { new: true, runValidators: true } 
+    );
+
+    if (!updatedTodo) {
+      return res.status(404).send("Todo not found");
+    }
+
+    console.log("Updated document:", updatedTodo);
+    res.send("Data updated successfully");
+  } catch (err) {
+    console.error("Error updating todo:", err);
+    res.status(500).send("Failed to update todo");
+  }
+};
+
+module.exports.deleteTodo = async (req, res) => {
+  const { id } = req.params; 
+
+  try {
+    const deletedTodo = await todoModel.findByIdAndDelete(id);
+
+    if (!deletedTodo) {
+      return res.status(404).send("Todo not found");
+    }
+
+    res.send("Successfully deleted");
+    console.log("Deleted successfully:", deletedTodo);
+  } catch (err) {
+    console.error("Error deleting todo:", err);
+    res.status(500).send("Failed to delete todo");
+  }
+};
